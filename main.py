@@ -16,24 +16,35 @@ adjaceny_matrix = numpy.array([[0,   1,   0,   0],
                                [1,   1,   0,   0]])
 
 
-def transform_adjacency_matrix(world_wide_web_matrix: numpy.array):
-    
-    # Ensure the matrix is squared
-    assert world_wide_web_matrix.shape[0] == world_wide_web_matrix.shape[1],\
-        """page_rank Error: The world wide web matrix must be squared,
-        rows: {} cols: {}.""".format(world_wide_web_matrix.shape[0],
-                                     world_wide_web_matrix.shape[1])
+def get_probability_matrix(adjacency_matrix: numpy.array):
+    """
+    Calculate each page outer links.
+    In the adjacency matrix, a row represents a page, therefore each 1 in that 
+    row represents an outer link for that page. 
+    Calculate the number of '1s' for each page
 
-    number_of_pages = world_wide_web_matrix.shape[0]
+    Input:
+        adjacency_matrix (numpy.array): Adjacency matrix
+
+    Output:
+        A (numpy.single): Probability matrix
+    """
+
+
+    # Ensure the matrix is squared
+    assert adjacency_matrix.shape[0] == adjacency_matrix.shape[1],\
+        """page_rank Error: The world wide web matrix must be squared,
+        rows: {} cols: {}.""".format(adjacency_matrix.shape[0],
+                                     adjacency_matrix.shape[1])
+
+    number_of_pages = adjacency_matrix.shape[0]
     page_outer_links_dict = {}
 
-    # Calculate each page outer links
-    # A row represents a page, therefore each 1 in that row represents an outer
-    # link for that page. Calculate the number of '1s' for each page
+    
     for row in range(number_of_pages):
         page_outer_links_dict[row] = 0
         for col in range(number_of_pages):
-            if world_wide_web_matrix[row, col] == 1:
+            if adjacency_matrix[row, col] == 1:
                 page_outer_links_dict[row] += 1
 
 
@@ -42,12 +53,13 @@ def transform_adjacency_matrix(world_wide_web_matrix: numpy.array):
     
     for row in range(number_of_pages):
         for col in range(number_of_pages):
-            if world_wide_web_matrix[row, col] == 1:
+            if adjacency_matrix[row, col] == 1:
                 A[col, row] = (1 / page_outer_links_dict[row])
+
     return A
 
 
-def page_rank(world_wide_web_matrix: numpy.array):
+def page_rank(adjacency_matrix: numpy.array):
     """
     Calculates the rank for every page given an adjacency matrix
     Uses the formula lim n->Inf (A^n*S) = P where A is the adjacency matrix
@@ -55,10 +67,13 @@ def page_rank(world_wide_web_matrix: numpy.array):
     the rank of each page.
 
     Input:
-        world_wide_web_matrix (numpy.array): Adjacency matrix of the world wide web
+        adjacency_matrix (numpy.array): Adjacency matrix of the world wide web
     Output:
         P (numpy.array): Eigenvector representing the rank of each page
     """
+    # Get Probability matrix
+    world_wide_web_matrix = get_probability_matrix(adjacency_matrix)
+
     # Ensure the matrix is squared
     assert world_wide_web_matrix.shape[0] == world_wide_web_matrix.shape[1],\
         """page_rank Error: The world wide web matrix must be squared,
@@ -88,10 +103,10 @@ def page_rank(world_wide_web_matrix: numpy.array):
     return P
 
 
-print(adjaceny_matrix)
-# eigen_vector = page_rank(world_wide_web_matrix)
-transform_adjacency_matrix(adjaceny_matrix)
-# print(eigen_vector)
+#print(adjaceny_matrix)
+eigen_vector = page_rank(adjaceny_matrix)
+#get_probability_matrix(adjaceny_matrix)
+print(eigen_vector)
 
 # TODO
 # - Get the the center or centers of the adjacency matrix
