@@ -1,19 +1,10 @@
 import numpy
 
-world_wide_web_matrix = numpy.array([[0,   0,   1/2,   1/2],
-                                     [1,   0,     0,   1/2],
-                                     [0, 1/2,     0,     0],
-                                     [0, 1/2,   1/2,     0]])
-#   A    B    C    D
-# A[[0,   1,   0,   0],
-# B [0,   0,   1,   1],
-# C [1,   0,   0,   1],
-# D [1,   1,   0,   0]]
-
-adjaceny_matrix = numpy.array([[0,   1,   0,   0],
-                               [0,   0,   1,   1],
-                               [1,   0,   0,   1],
-                               [1,   1,   0,   0]])
+world_wide_web_matrix = numpy.array([[0,   1,   0,   0,   0],
+                                     [1,   0,   1,   1,   0],
+                                     [1,   0,   0,   1,   1],
+                                     [1,   1,   0,   0,   0],
+                                     [0,   0,   1,   0,   0]])
 
 
 def get_probability_matrix(adjacency_matrix: numpy.array):
@@ -30,7 +21,6 @@ def get_probability_matrix(adjacency_matrix: numpy.array):
         A (numpy.single): Probability matrix
     """
 
-
     # Ensure the matrix is squared
     assert adjacency_matrix.shape[0] == adjacency_matrix.shape[1],\
         """page_rank Error: The world wide web matrix must be squared,
@@ -40,21 +30,22 @@ def get_probability_matrix(adjacency_matrix: numpy.array):
     number_of_pages = adjacency_matrix.shape[0]
     page_outer_links_dict = {}
 
-    
     for row in range(number_of_pages):
         page_outer_links_dict[row] = 0
         for col in range(number_of_pages):
             if adjacency_matrix[row, col] == 1:
                 page_outer_links_dict[row] += 1
 
-
     # Generate the Probability matrix A
-    A = numpy.single([[0 for j in range(number_of_pages)] for i in range(number_of_pages)])
-    
+    A = numpy.single([[0 for j in range(number_of_pages)]
+                      for i in range(number_of_pages)])
+
     for row in range(number_of_pages):
         for col in range(number_of_pages):
             if adjacency_matrix[row, col] == 1:
                 A[col, row] = (1 / page_outer_links_dict[row])
+
+    print(page_outer_links_dict)
 
     return A
 
@@ -74,6 +65,9 @@ def page_rank(adjacency_matrix: numpy.array):
     # Get Probability matrix
     world_wide_web_matrix = get_probability_matrix(adjacency_matrix)
 
+    print("Probability Matrix:")
+    print(world_wide_web_matrix)
+
     # Ensure the matrix is squared
     assert world_wide_web_matrix.shape[0] == world_wide_web_matrix.shape[1],\
         """page_rank Error: The world wide web matrix must be squared,
@@ -91,22 +85,21 @@ def page_rank(adjacency_matrix: numpy.array):
     P = numpy.dot(world_wide_web_matrix, P_before_multiplication)
     error = numpy.sqrt(numpy.add(
         P.T, -1 * P_before_multiplication.T).dot(numpy.add(P, -1 * P_before_multiplication)))[0][0]
-    print(error)
+    # print(error)
 
     while abs(error) > 0.00001:
         P_before_multiplication = P
         P = numpy.dot(world_wide_web_matrix, P_before_multiplication)
         error = numpy.sqrt(numpy.add(
             P.T, -1 * P_before_multiplication.T).dot(numpy.add(P, -1 * P_before_multiplication)))[0][0]
-        print(error)
+        # print(error)
 
     return P
 
 
-#print(adjaceny_matrix)
-eigen_vector = page_rank(adjaceny_matrix)
-#get_probability_matrix(adjaceny_matrix)
+eigen_vector = page_rank(world_wide_web_matrix)
 print(eigen_vector)
 
 # TODO
 # - Get the the center or centers of the adjacency matrix
+# Como el Grafo es simple, solo puede haber un enlace de pagina B a la pagina C
