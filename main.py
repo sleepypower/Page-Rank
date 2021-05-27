@@ -15,7 +15,17 @@ world_wide_web_matrix = numpy.array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
                                      [0, 0, 1, 1, 1, 0, 1, 1, 0, 0]])
 
 
-def model_graph(adjacency_matrix, eigenvector):
+def draw_graph(adjacency_matrix: numpy.array, eigenvector: numpy.array) -> None:
+    """
+    Draws the graph 
+
+    Input:
+        adjacency_matrix (numpy.array): Adjacency matrix of the graph
+        eigenvector (numpy.array): Eigenvector representing the rank for each page
+
+    Output:
+        None
+    """
     G = networkx.from_numpy_matrix(
         adjacency_matrix, create_using=networkx.MultiDiGraph)
     shift = [0, -0.1]
@@ -147,4 +157,4 @@ def page_rank(adjacency_matrix: numpy.array) -> numpy.single:
 eigen_vector = page_rank(world_wide_web_matrix)
 print("eigen_vector:")
 print(eigen_vector)
-model_graph(world_wide_web_matrix, eigen_vector)
+draw_graph(world_wide_web_matrix, eigen_vector)
