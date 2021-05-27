@@ -154,7 +154,10 @@ def page_rank(adjacency_matrix: numpy.array) -> numpy.single:
     return P
 
 
-eigen_vector = page_rank(world_wide_web_matrix)
-print("eigen_vector:")
-print(eigen_vector)
-draw_graph(world_wide_web_matrix, eigen_vector)
+if __name__ == '__main__':
+    # Get ranks
+    eigen_vector = page_rank(world_wide_web_matrix)
+
+    print("eigen_vector:")
+    print(eigen_vector)
+    draw_graph(world_wide_web_matrix, eigen_vector)
