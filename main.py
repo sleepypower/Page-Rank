@@ -1,13 +1,49 @@
 import numpy
+import networkx
+import matplotlib.pyplot as plt
+from networkx.algorithms.distance_measures import center
 
-world_wide_web_matrix = numpy.array([[0,   1,   0,   0,   0],
-                                     [1,   0,   1,   1,   0],
-                                     [1,   0,   0,   1,   1],
-                                     [1,   1,   0,   0,   0],
-                                     [0,   0,   1,   0,   0]])
+world_wide_web_matrix = numpy.array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                                     [0, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+                                     [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                                     [0, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+                                     [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+                                     [0, 1, 1, 1, 0, 0, 1, 0, 1, 1],
+                                     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                                     [0, 1, 0, 0, 0, 1, 1, 0, 1, 0],
+                                     [1, 0, 1, 1, 1, 0, 0, 1, 0, 1],
+                                     [0, 0, 1, 1, 1, 0, 1, 1, 0, 0]])
 
 
-def get_probability_matrix(adjacency_matrix: numpy.array):
+def model_graph(adjacency_matrix, eigenvector):
+    G = networkx.from_numpy_matrix(
+        adjacency_matrix, create_using=networkx.MultiDiGraph)
+    shift = [0, -0.1]
+
+    print("centro: ", center(G))
+
+    pos = networkx.spring_layout(G)
+
+    shifted_pos = {node: node_pos + shift for node, node_pos in pos.items()}
+
+    networkx.draw(G, with_labels=True, pos=pos)
+
+    labels = {}
+    for page in range(adjacency_matrix.shape[0]):
+        labels[page] = round(eigenvector[page, 0], 4)
+
+    networkx.draw_networkx_labels(
+        G, shifted_pos, labels=labels, horizontalalignment="left", font_size=8)
+
+    # adjust frame to avoid cutting text, may need to adjust the value
+    axis = plt.gca()
+    axis.set_xlim([1.5*x for x in axis.get_xlim()])
+    axis.set_ylim([1.5*y for y in axis.get_ylim()])
+
+    plt.show()  # display
+
+
+def get_probability_matrix(adjacency_matrix: numpy.array) -> numpy.single:
     """
     Calculate each page outer links.
     In the adjacency matrix, a row represents a page, therefore each 1 in that 
@@ -45,12 +81,12 @@ def get_probability_matrix(adjacency_matrix: numpy.array):
             if adjacency_matrix[row, col] == 1:
                 A[col, row] = (1 / page_outer_links_dict[row])
 
-    print(page_outer_links_dict)
+    print("# Outer links de cada pagina: ", page_outer_links_dict)
 
     return A
 
 
-def page_rank(adjacency_matrix: numpy.array):
+def page_rank(adjacency_matrix: numpy.array) -> numpy.single:
     """
     Calculates the rank for every page given an adjacency matrix
     Uses the formula lim n->Inf (A^n*S) = P where A is the adjacency matrix
@@ -65,8 +101,8 @@ def page_rank(adjacency_matrix: numpy.array):
     # Get Probability matrix
     world_wide_web_matrix = get_probability_matrix(adjacency_matrix)
 
-    print("Probability Matrix:")
-    print(world_wide_web_matrix)
+    #print("Probability Matrix:")
+    # print(world_wide_web_matrix)
 
     # Ensure the matrix is squared
     assert world_wide_web_matrix.shape[0] == world_wide_web_matrix.shape[1],\
@@ -85,21 +121,30 @@ def page_rank(adjacency_matrix: numpy.array):
     P = numpy.dot(world_wide_web_matrix, P_before_multiplication)
     error = numpy.sqrt(numpy.add(
         P.T, -1 * P_before_multiplication.T).dot(numpy.add(P, -1 * P_before_multiplication)))[0][0]
-    # print(error)
 
     while abs(error) > 0.00001:
         P_before_multiplication = P
         P = numpy.dot(world_wide_web_matrix, P_before_multiplication)
         error = numpy.sqrt(numpy.add(
             P.T, -1 * P_before_multiplication.T).dot(numpy.add(P, -1 * P_before_multiplication)))[0][0]
-        # print(error)
+
+    rank_dict = {}
+
+    # Assign rank to each page
+    highest_page = 0
+
+    for page in range(number_of_pages):
+        page_rank = P[page, 0]
+        rank_dict[page] = page_rank
+        if page_rank > rank_dict[highest_page]:
+            highest_page = page
+
+    print("Highest page: ", highest_page)
 
     return P
 
 
 eigen_vector = page_rank(world_wide_web_matrix)
+print("eigen_vector:")
 print(eigen_vector)
-
-# TODO
-# - Get the the center or centers of the adjacency matrix
-# Como el Grafo es simple, solo puede haber un enlace de pagina B a la pagina C
+model_graph(world_wide_web_matrix, eigen_vector)
